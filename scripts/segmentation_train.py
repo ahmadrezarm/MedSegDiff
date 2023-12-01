@@ -16,8 +16,8 @@ from guided_diffusion.script_util import (
 )
 import torch as th
 from guided_diffusion.train_util import TrainLoop
-from visdom import Visdom
-viz = Visdom(port=8850)
+#from visdom import Visdom
+#viz = Visdom(port=8850)
 import torchvision.transforms as transforms
 
 def main():
@@ -58,13 +58,26 @@ def main():
     model, diffusion = create_model_and_diffusion(
         **args_to_dict(args, model_and_diffusion_defaults().keys())
     )
+
+
+    # Editing the code to just get the number of gpus in multi_gpu, instead of gpu ids. 
+    # Assuming `args.num_gpus` is the argument that specifies the number of GPUs to use
+    if args.num_gpus > 1:
+        # Use all available GPUs up to the number specified in args.num_gpus
+        model = th.nn.DataParallel(model, device_ids=list(range(args.num_gpus)))
+        model.to(device=th.device('cuda:0'))  # Move model to the first CUDA device
+    else:
+        # Use a single GPU or CPU (based on what is available)
+        model.to(dist_util.dev())
+    schedule_sampler = create_named_schedule_sampler(args.schedule_sampler, diffusion, maxt=args.diffusion_steps)
+    """ 
     if args.multi_gpu:
         model = th.nn.DataParallel(model,device_ids=[int(id) for id in args.multi_gpu.split(',')])
         model.to(device = th.device('cuda', int(args.gpu_dev)))
     else:
         model.to(dist_util.dev())
     schedule_sampler = create_named_schedule_sampler(args.schedule_sampler, diffusion,  maxt=args.diffusion_steps)
-
+    """
 
     logger.log("training...")
     TrainLoop(
