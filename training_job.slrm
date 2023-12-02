@@ -1,20 +1,30 @@
 #!/bin/bash
-#SBATCH --job-name=MedSegDiff
-#SBATCH --time=48:00:00
+#SBATCH --job-name=MedSegDiffMRI-single-node-multiple-gpus
+#SBATCH --nodes=1
+#SBATCH --mem=32gb
+#SBATCH --cpus-per-gpu=16
+#SBATCH --gres=gpu:a40:4            ## Request 4 GPUs
+#SBATCH --qos=m
+
+## Append is important because otherwise preemption resets the file
+#SBATCH --open-mode=append
+
+##SBATCH --time=12:00:00        ## commented to see what happens
+
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
-#SBATCH --ntasks=1               # Number of tasks (processes)
-#SBATCH --gres=gpu:a40:1             # Request 1 GPUs
-#SBATCH --cpus-per-task=4        # CPU cores per task
-#SBATCH --mem=32G                # Memory per node
-#SBATCH --mail-type=ALL     # Mail events (NONE, BEGIN, END, FAIL, ALL)
-#SBATCH --mail-user=ahmad.rm0067@gmail.com #  email
+##SBATCH --ntasks=1                            ## Number of tasks (processes)
+#SBATCH --mail-type=ALL                         ## Mail events (NONE, BEGIN, END, FAIL, ALL)
+#SBATCH --mail-user=ahmad.rm0067@gmail.com      ## email
 
-##SBATCH --partition=t4v2
-#SBATCH --qos=long
+###SBATCH --cpus-per-task=4        ## CPU cores per task
+###SBATCH --mem=32G                ## Memory per node
 
-# Append is important because otherwise preemption resets the file
-#SBATCH --open-mode=append
+
+####SBATCH --partition=
+
+
+
 
 echo "$(date): Job $SLURM_JOB_ID is allocated resource"
 
@@ -27,7 +37,7 @@ source /pkgs/anaconda3/bin/activate /h/ahmad/ShadiProject2 || conda activate /h/
 CHECKPOINT_DIR=/checkpoint/${USER}
 
 # running:
-python /h/ahmad/ShadiProject/MedSegDiff/scripts/segmentation_train.py \
+python /h/ahmad/ShadiProject/MedSegDiff/scripts/segmentation_train.py \   ############ edit the directory
   --data_name ISIC \
   --data_dir "/h/ahmad/ShadiProject/ISIC" \
   --out_dir ${CHECKPOINT_DIR} \
@@ -44,7 +54,8 @@ python /h/ahmad/ShadiProject/MedSegDiff/scripts/segmentation_train.py \
   --rescale_learned_sigmas False \
   --rescale_timesteps False \
   --lr 1e-4 \
-  --batch_size 8
+  --batch_size 8\
+  --multi_gpu 4
 
 
 
@@ -58,8 +69,6 @@ cp ./$SLURM_JOB_ID.out $archive/job.out
 cp ./$SLURM_JOB_ID.err $archive/job.err
 
 # Copy the results from the checkpoint directory to the permanent results directory
-mkdir /h/ahmad/ShadiProject/results/training_resluts/2nd_training
-cp -r ${CHECKPOINT_DIR}/* /h/ahmad/ShadiProject/results/training_resluts/2nd_training
-(base) ahmad@v3:~/ShadiProject/MedSegDiff$ nano launch_job_single_gpu.slrm 
-
+mkdir /h/ahmad/MRI/results/training_resluts/2nd_training   ################### edit the directory
+cp -r ${CHECKPOINT_DIR}/* /h/ahmad/ShadiProject/results/training_resluts/2nd_training ########### edit the directory
 

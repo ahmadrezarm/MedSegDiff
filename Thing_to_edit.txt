@@ -1,0 +1,21 @@
+DONE! 1. Edit the code to get the gpus without specifying their names, just by count.
+
+DONE! 2. Add the slurm file for training
+
+3. Add the slurm file for sampling
+
+DONE! 4. All users should use the /checkpoint/${USER} directory for checkpointingn NOT /checkpoint/${USER}/${SLURM_JOB_ID}. /checkpoint/${USER}/${SLURM_JOB_ID} is automatically created for you to perform checkpointing
+
+5. Edit the .slrm file so that it runs again in case of interruption. Make sure you see:
+     resume_checkpoint=None, #"/results/pretrainedmodel.pt"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+     in the segmentation_train.py
+
+
+
+6. Unzip the data, and make sure the names match with what the code expects.
+
+
+
+For 5, I am trying to comment the waltime to see what happens. The code is a bit complicated regrding the checkpointing. 
+Lets see what happens.
